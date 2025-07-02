@@ -4,16 +4,264 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Aplikasi Menabung</title>
+  <!-- Google Fonts: Roboto for text, Playfair Display for headings -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
-    h1, h2 { text-align: center; }
-    input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #2ecc71; color: white; border: none; cursor: pointer; }
-    button:hover { background: #27ae60; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-    .hapus-btn { background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 5px; }
+    :root {
+      --primary-color: #2ecc71; /* Green */
+      --primary-dark: #27ae60;
+      --secondary-color: #3498db; /* Blue */
+      --accent-color: #f39c12; /* Orange */
+      --danger-color: #e74c3c; /* Red */
+      --text-color: #333;
+      --light-bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --border-color: #e0e0e0;
+      --shadow-light: 0 2px 5px rgba(0,0,0,0.08);
+      --shadow-medium: 0 4px 10px rgba(0,0,0,0.1);
+      --border-radius: 8px;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      padding: 20px;
+      background: var(--light-bg);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 700px; /* Slightly wider container */
+      margin: auto;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-medium);
+    }
+    h1, h2 {
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+      color: var(--primary-dark);
+      margin-bottom: 25px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      box-sizing: border-box; /* Include padding in width */
+    }
+    button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.1s ease;
+      display: flex; /* For icon alignment */
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button.secondary { /* For register button */
+      background: var(--secondary-color);
+    }
+    button.secondary:hover {
+      background: #2980b9;
+    }
+    table {
+      width: 100%;
+      margin-top: 25px;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      overflow: hidden; /* For rounded corners on table */
+      box-shadow: var(--shadow-light);
+    }
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      text-align: left; /* Align text left for better readability */
+    }
+    th {
+      background: var(--primary-color);
+      color: white;
+      font-weight: 500;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .hapus-btn {
+      background: var(--danger-color);
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+    .hapus-btn:hover {
+      background: #c0392b;
+    }
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .auth-buttons button {
+      flex: 1;
+    }
+    #auth-msg {
+      text-align: center;
+      color: var(--danger-color);
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    #user-area p {
+      text-align: right;
+      font-size: 15px;
+      color: #555;
+    }
+    #user-area p button {
+      width: auto;
+      padding: 5px 10px;
+      margin-left: 10px;
+      background: #95a5a6; /* Grey for logout */
+    }
+    #user-area p button:hover {
+      background: #7f8c8d;
+    }
+    .action-link {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    .action-link:hover {
+      color: #2980b9;
+      text-decoration: underline;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      background: #f0f4f7;
+      border-radius: var(--border-radius);
+      margin-top: 20px;
+      color: #666;
+    }
+    .empty-state i {
+      font-size: 48px;
+      color: var(--border-color);
+      margin-bottom: 15px;
+    }
+
+    /* Media Queries untuk Responsif */
+
+    /* Untuk layar yang lebih kecil dari 768px (misalnya, tablet dan mobile) */
+    @media (max-width: 768px) {
+        body {
+            padding: 15px;
+        }
+
+        .container {
+            padding: 20px;
+            margin: 10px; /* Sedikit margin agar tidak terlalu mepet ke tepi */
+        }
+
+        h1, h2 {
+            font-size: 1.8em; /* Ukuran font lebih kecil untuk judul */
+            margin-bottom: 20px;
+        }
+
+        input, textarea, button {
+            padding: 10px;
+            font-size: 15px;
+            margin: 8px 0;
+        }
+
+        .auth-buttons {
+            flex-direction: column; /* Tombol login/register menjadi vertikal */
+            gap: 8px;
+        }
+
+        table, thead, tbody, th, td, tr {
+            display: block; /* Membuat tabel responsif */
+        }
+
+        thead tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        tr {
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        td {
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            padding-left: 50%; /* Ruang untuk label */
+            text-align: right; /* Teks konten di kanan */
+        }
+
+        td:last-child {
+            border-bottom: none;
+        }
+
+        td:before {
+            content: attr(data-label); /* Menampilkan label dari atribut data-label */
+            position: absolute;
+            left: 10px;
+            width: 45%;
+            padding-right: 10px;
+            white-space: nowrap;
+            text-align: left;
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* Khusus untuk kolom aksi di tabel */
+        td:nth-of-type(6) { /* Kolom Aksi */
+            text-align: center;
+            padding-left: 10px; /* Hapus padding-left tambahan */
+        }
+        td:nth-of-type(6):before {
+            content: ""; /* Hapus label untuk kolom aksi */
+        }
+    }
+
+    /* Untuk layar yang lebih kecil dari 480px (misalnya, smartphone) */
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+
+        .container {
+            padding: 15px;
+            margin: 5px;
+        }
+
+        h1 {
+            font-size: 1.6em;
+        }
+
+        h2 {
+            font-size: 1.4em;
+        }
+    }
   </style>
 </head>
 <body>
@@ -22,45 +270,54 @@
 
   <div id="auth">
     <h2>Login / Register</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <button onclick="register()">Register</button>
+    <input type="email" id="email" placeholder="Email" autocomplete="username">
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+    <div class="auth-buttons">
+      <button onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>
+      <button class="secondary" onclick="register()"><i class="fas fa-user-plus"></i> Register</button>
+    </div>
     <p id="auth-msg"></p>
   </div>
 
   <div id="user-area" style="display:none;">
-    <p>Login sebagai: <span id="userEmail"></span> <button onclick="logout()">Logout</button></p>
+    <p>Login sebagai: <span id="userEmail"></span> <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></p>
     
-    <h2>Tambah Tabungan</h2>
-    <input type="text" id="nama" placeholder="Nama Tabungan">
-    <input type="number" id="jumlah" placeholder="Jumlah (Rp)">
-    <input type="number" id="goal" placeholder="Target Tabungan (Rp)">
-    <input type="url" id="link" placeholder="Link Barang (opsional)">
-    <textarea id="catatan" placeholder="Catatan (opsional)"></textarea>
-    <button onclick="tambahTabungan()">Tambah</button>
+    <h2>Tambah Tabungan Baru</h2>
+    <input type="text" id="nama" placeholder="Nama Tabungan (e.g., Beli Laptop Baru)">
+    <input type="number" id="jumlah" placeholder="Jumlah Saat Ini (Rp)" min="0">
+    <input type="number" id="goal" placeholder="Target Tabungan (Rp)" min="0">
+    <input type="url" id="link" placeholder="Link Barang (opsional, e.g., Tokopedia/Shopee)">
+    <textarea id="catatan" placeholder="Catatan Tambahan (opsional)"></textarea>
+    <button onclick="tambahTabungan()"><i class="fas fa-plus-circle"></i> Tambah Tabungan</button>
 
-    <h2>Data Tabungan</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>Jumlah</th>
-          <th>Goal</th>
-          <th>Link</th>
-          <th>Catatan</th>
-          <th>Hapus</th>
-        </tr>
-      </thead>
-      <tbody id="tabel-tabungan"></tbody>
-    </table>
+    <h2>Daftar Tabungan Anda</h2>
+    <div id="tabungan-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Jumlah</th>
+            <th>Target</th>
+            <th>Link</th>
+            <th>Catatan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tabel-tabungan">
+          <!-- Tabungan items will be loaded here -->
+        </tbody>
+      </table>
+      <div id="empty-tabungan-state" class="empty-state" style="display:none;">
+        <i class="fas fa-piggy-bank"></i>
+        <p>Belum ada tabungan yang ditambahkan. Yuk, mulai menabung!</p>
+      </div>
+    </div>
   </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
 
 <script>
   const firebaseConfig = {
@@ -84,36 +341,49 @@
       if (user) {
         currentUser = user;
         afterLogin();
+      } else {
+        document.getElementById("auth").style.display = "block";
+        document.getElementById("user-area").style.display = "none";
       }
     });
 
     window.login = async function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const authMsg = document.getElementById("auth-msg");
+      authMsg.textContent = ""; // Clear previous messages
+
       try {
         const result = await auth.signInWithEmailAndPassword(email, password);
         currentUser = result.user;
         afterLogin();
       } catch (err) {
-        document.getElementById("auth-msg").textContent = "Login gagal: " + err.message;
+        authMsg.textContent = "Login gagal: " + err.message;
+        authMsg.style.color = "var(--danger-color)";
       }
     }
 
     window.register = async function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const authMsg = document.getElementById("auth-msg");
+      authMsg.textContent = ""; // Clear previous messages
+
       try {
         const result = await auth.createUserWithEmailAndPassword(email, password);
         currentUser = result.user;
         afterLogin();
+        authMsg.textContent = "Registrasi berhasil! Silakan login.";
+        authMsg.style.color = "var(--primary-color)";
       } catch (err) {
-        document.getElementById("auth-msg").textContent = "Registrasi gagal: " + err.message;
+        authMsg.textContent = "Registrasi gagal: " + err.message;
+        authMsg.style.color = "var(--danger-color)";
       }
     }
 
     window.logout = async function () {
       await auth.signOut();
-      location.reload();
+      location.reload(); // Reload to show login screen
     }
 
     window.afterLogin = async function () {
@@ -130,48 +400,78 @@
       const link = document.getElementById("link").value;
       const catatan = document.getElementById("catatan").value;
 
-      if (!nama || isNaN(jumlah)) {
-        alert("Nama dan jumlah wajib diisi!");
+      if (!nama || isNaN(jumlah) || jumlah < 0) {
+        alert("Nama dan jumlah saat ini wajib diisi dengan angka positif!");
+        return;
+      }
+      if (isNaN(goal) || goal < 0) {
+        alert("Target tabungan wajib diisi dengan angka positif!");
         return;
       }
 
-      await db.collection("users").doc(currentUser.uid).collection("tabungan").add({
-        nama, jumlah, goal, link, catatan,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      try {
+        await db.collection("users").doc(currentUser.uid).collection("tabungan").add({
+          nama, jumlah, goal, link, catatan,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-      loadTabungan();
-      document.getElementById("nama").value = "";
-      document.getElementById("jumlah").value = "";
-      document.getElementById("goal").value = "";
-      document.getElementById("link").value = "";
-      document.getElementById("catatan").value = "";
+        loadTabungan();
+        // Clear form fields
+        document.getElementById("nama").value = "";
+        document.getElementById("jumlah").value = "";
+        document.getElementById("goal").value = "";
+        document.getElementById("link").value = "";
+        document.getElementById("catatan").value = "";
+      } catch (error) {
+        alert("Gagal menambahkan tabungan: " + error.message);
+      }
     }
 
     window.loadTabungan = async function () {
-      const snapshot = await db.collection("users").doc(currentUser.uid).collection("tabungan").orderBy("createdAt", "desc").get();
       const tbody = document.getElementById("tabel-tabungan");
-      tbody.innerHTML = "";
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.nama}</td>
-          <td>${formatRupiah(data.jumlah)}</td>
-          <td>${formatRupiah(data.goal || 0)}</td>
-          <td>${data.link ? `<a href="${data.link}" target="_blank">Lihat</a>` : "-"}</td>
-          <td>${data.catatan || "-"}</td>
-		  <td><a href="tabungan.html?id=${doc.id}">📊 Detail</a></td>
-          <td><button class="hapus-btn" onclick="hapusTabungan('${doc.id}')">Hapus</button></td>
-        `;
-        tbody.appendChild(row);
-      });
+      const emptyState = document.getElementById("empty-tabungan-state");
+      tbody.innerHTML = ""; // Clear existing rows
+
+      try {
+        const snapshot = await db.collection("users").doc(currentUser.uid).collection("tabungan").orderBy("createdAt", "desc").get();
+        
+        if (snapshot.empty) {
+          emptyState.style.display = "block";
+          document.querySelector("#tabungan-list table").style.display = "none";
+        } else {
+          emptyState.style.display = "none";
+          document.querySelector("#tabungan-list table").style.display = "table";
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td data-label="Nama">${data.nama}</td>
+              <td data-label="Jumlah">${formatRupiah(data.jumlah)}</td>
+              <td data-label="Target">${formatRupiah(data.goal || 0)}</td>
+              <td data-label="Link">${data.link ? `<a href="${data.link}" target="_blank" class="action-link"><i class="fas fa-external-link-alt"></i> Lihat</a>` : "-"}</td>
+              <td data-label="Catatan">${data.catatan || "-"}</td>
+              <td data-label="Aksi">
+                <a href="tabungan.html?id=${doc.id}" class="action-link" title="Lihat Detail"><i class="fas fa-chart-bar"></i> Detail</a>
+                <button class="hapus-btn" onclick="hapusTabungan('${doc.id}')" title="Hapus Tabungan"><i class="fas fa-trash-alt"></i></button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+      } catch (error) {
+        console.error("Error loading tabungan:", error);
+        alert("Gagal memuat data tabungan.");
+      }
     }
 
     window.hapusTabungan = async function (id) {
-      if (confirm("Yakin hapus tabungan ini?")) {
-        await db.collection("users").doc(currentUser.uid).collection("tabungan").doc(id).delete();
-        loadTabungan();
+      if (confirm("Yakin ingin menghapus tabungan ini? Aksi ini tidak dapat dibatalkan.")) {
+        try {
+          await db.collection("users").doc(currentUser.uid).collection("tabungan").doc(id).delete();
+          loadTabungan(); // Reload list after deletion
+        } catch (error) {
+          alert("Gagal menghapus tabungan: " + error.message);
+        }
       }
     }
 

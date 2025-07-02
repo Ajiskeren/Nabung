@@ -4,52 +4,288 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Detail Tabungan</title>
+  <!-- Google Fonts: Roboto for text, Playfair Display for headings -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    body { font-family: sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; }
-    .progress-container { margin: 20px 0; }
-    .progress-bar { height: 25px; background: #e0e0e0; border-radius: 12px; overflow: hidden; }
-    .progress-fill { height: 100%; background: #27ae60; width: 0%; color: white; text-align: center; line-height: 25px; transition: width 0.5s; }
-    .form-group { margin: 15px 0; }
-    input, textarea, button { width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
-    button { background: #2980b9; color: white; border: none; }
-    button:hover { background: #1c6ea4; }
-    .saldo-section { display: flex; gap: 10px; margin-top: 10px; }
-    .riwayat { margin-top: 30px; }
-    .riwayat-item { padding: 10px; border-bottom: 1px solid #ddd; }
-    .riwayat-item span { display: block; }
-    .positif { color: #27ae60; }
-    .negatif { color: #c0392b; }
-    a { color: #2980b9; }
+    :root {
+      --primary-color: #2ecc71; /* Green */
+      --primary-dark: #27ae60;
+      --secondary-color: #3498db; /* Blue */
+      --accent-color: #f39c12; /* Orange */
+      --danger-color: #e74c3c; /* Red */
+      --text-color: #333;
+      --light-bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --border-color: #e0e0e0;
+      --shadow-light: 0 2px 5px rgba(0,0,0,0.08);
+      --shadow-medium: 0 4px 10px rgba(0,0,0,0.1);
+      --border-radius: 8px;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--light-bg);
+      margin: 0;
+      padding: 20px;
+      color: var(--text-color);
+    }
+    .container {
+      max-width: 650px; /* Slightly wider */
+      margin: auto;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-medium);
+    }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+      color: var(--primary-dark);
+      margin-bottom: 25px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      text-decoration: none;
+      color: var(--secondary-color);
+      font-weight: 500;
+      transition: color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .back-link:hover {
+      color: #2980b9;
+      text-decoration: underline;
+    }
+    .progress-container {
+      margin: 25px 0;
+      background: #f0f4f7;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+    }
+    .progress-bar {
+      height: 30px; /* Taller progress bar */
+      background: var(--border-color);
+      border-radius: 15px; /* More rounded */
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      width: 0%;
+      color: white;
+      text-align: center;
+      line-height: 30px;
+      transition: width 0.8s ease-out; /* Smoother transition */
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+    .progress-container p {
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: 500;
+      color: #555;
+    }
+    .form-group {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f0f4f7;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      box-sizing: border-box;
+    }
+    button {
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button.add {
+      background: var(--primary-color);
+    }
+    button.add:hover {
+      background: var(--primary-dark);
+    }
+    button.subtract {
+      background: var(--danger-color);
+    }
+    button.subtract:hover {
+      background: #c0392b;
+    }
+    .saldo-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Two columns for buttons */
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .riwayat {
+      margin-top: 30px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      padding: 20px;
+    }
+    .riwayat h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .riwayat-item {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .riwayat-item:last-child {
+      border-bottom: none;
+    }
+    .riwayat-item span {
+      display: block;
+      font-size: 1.1em;
+      font-weight: 500;
+    }
+    .riwayat-item small {
+      font-size: 0.85em;
+      color: #777;
+    }
+    .positif {
+      color: var(--primary-dark);
+    }
+    .negatif {
+      color: var(--danger-color);
+    }
+    a {
+      color: var(--secondary-color);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .info-section p {
+      margin-bottom: 10px;
+      font-size: 1.05em;
+    }
+    .info-section strong {
+      color: #555;
+    }
+
+    /* Media Queries untuk Responsif */
+
+    /* Untuk layar yang lebih kecil dari 768px (misalnya, tablet dan mobile) */
+    @media (max-width: 768px) {
+        body {
+            padding: 15px;
+        }
+
+        .container {
+            padding: 20px;
+            margin: 10px; /* Sedikit margin agar tidak terlalu mepet ke tepi */
+        }
+
+        h2 {
+            font-size: 1.8em; /* Ukuran font lebih kecil untuk judul */
+            margin-bottom: 20px;
+        }
+
+        input, textarea, button {
+            padding: 10px;
+            font-size: 15px;
+            margin: 8px 0;
+        }
+    }
+
+    /* Untuk layar yang lebih kecil dari 480px (misalnya, smartphone) */
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+
+        .container {
+            padding: 15px;
+            margin: 5px;
+        }
+
+        h2 {
+            font-size: 1.4em;
+        }
+
+        .saldo-actions {
+            grid-template-columns: 1fr; /* Tombol tambah/kurang saldo menjadi vertikal */
+        }
+
+        .riwayat-item {
+            padding: 10px;
+        }
+
+        .riwayat-item span {
+            font-size: 1em;
+        }
+
+        .riwayat-item small {
+            font-size: 0.8em;
+        }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-  <a href="index.html" style="display:inline-block; margin-bottom:20px; text-decoration:none; color:#2980b9; font-weight:bold;">⬅️ Kembali ke Daftar Tabungan</a>
+  <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Tabungan</a>
     <h2 id="judul">Detail Tabungan</h2>
-    <p><strong>Link:</strong> <a id="link" href="#" target="_blank"></a></p>
-    <p><strong>Catatan:</strong> <span id="catatan"></span></p>
+
+    <div class="info-section">
+      <p><strong>Link Barang:</strong> <a id="link" href="#" target="_blank"><i class="fas fa-external-link-alt"></i></a></p>
+      <p><strong>Catatan:</strong> <span id="catatan"></span></p>
+    </div>
 
     <div class="progress-container">
       <div class="progress-bar">
         <div class="progress-fill" id="progress-fill">0%</div>
       </div>
-      <p><strong>Saldo:</strong> <span id="saldo"></span> / <span id="goal"></span></p>
+      <p><strong>Saldo Saat Ini:</strong> <span id="saldo"></span> / <strong>Target:</strong> <span id="goal"></span></p>
     </div>
 
-    <div class="saldo-section">
-      <div class="form-group">
-        <input type="number" id="jumlah" placeholder="Jumlah (Rp)">
-        <textarea id="keterangan" placeholder="Keterangan"></textarea>
-        <button onclick="tambahSaldo()">➕ Tambah Saldo</button>
-        <button onclick="kurangiSaldo()">➖ Kurangi Saldo</button>
+    <div class="form-group">
+      <h3>Kelola Saldo</h3>
+      <input type="number" id="jumlah" placeholder="Jumlah (Rp)" min="1">
+      <textarea id="keterangan" placeholder="Keterangan Transaksi (e.g., Gaji Bulan Ini, Beli Kopi)"></textarea>
+      <div class="saldo-actions">
+        <button class="add" onclick="tambahSaldo()"><i class="fas fa-plus"></i> Tambah Saldo</button>
+        <button class="subtract" onclick="kurangiSaldo()"><i class="fas fa-minus"></i> Kurangi Saldo</button>
       </div>
     </div>
 
     <div class="riwayat">
       <h3>Riwayat Transaksi</h3>
-      <div id="riwayat-list"></div>
+      <div id="riwayat-list">
+        <!-- Transaction history will be loaded here -->
+      </div>
     </div>
   </div>
 
@@ -76,12 +312,20 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       auth.onAuthStateChanged(async user => {
-        if (!user) return alert("Harus login dulu!");
+        if (!user) {
+          alert("Anda harus login untuk melihat detail tabungan ini!");
+          window.location.href = "index.html"; // Redirect to login page
+          return;
+        }
         userId = user.uid;
 
         const urlParams = new URLSearchParams(window.location.search);
         tabunganId = urlParams.get("id");
-        if (!tabunganId) return alert("ID tabungan tidak ditemukan!");
+        if (!tabunganId) {
+          alert("ID tabungan tidak ditemukan!");
+          window.location.href = "index.html";
+          return;
+        }
 
         tabunganRef = db.collection("users").doc(userId).collection("tabungan").doc(tabunganId);
         loadTabungan();
@@ -90,21 +334,38 @@
     });
 
     async function loadTabungan() {
-      const doc = await tabunganRef.get();
-      if (!doc.exists) return alert("Tabungan tidak ditemukan.");
+      try {
+        const doc = await tabunganRef.get();
+        if (!doc.exists) {
+          alert("Tabungan tidak ditemukan.");
+          window.location.href = "index.html";
+          return;
+        }
 
-      const data = doc.data();
-      document.getElementById("judul").textContent = data.nama;
-      document.getElementById("saldo").textContent = formatRupiah(data.jumlah || 0);
-      document.getElementById("goal").textContent = formatRupiah(data.goal || 0);
-      document.getElementById("link").textContent = data.link || "-";
-      document.getElementById("link").href = data.link || "#";
-      document.getElementById("catatan").textContent = data.catatan || "-";
+        const data = doc.data();
+        document.getElementById("judul").textContent = data.nama;
+        document.getElementById("saldo").textContent = formatRupiah(data.jumlah || 0);
+        document.getElementById("goal").textContent = formatRupiah(data.goal || 0);
+        
+        const linkElement = document.getElementById("link");
+        if (data.link) {
+          linkElement.href = data.link;
+          linkElement.innerHTML = `<i class="fas fa-external-link-alt"></i> ${data.link}`;
+        } else {
+          linkElement.textContent = "-";
+          linkElement.removeAttribute("href");
+        }
+        
+        document.getElementById("catatan").textContent = data.catatan || "-";
 
-      const persen = data.goal ? Math.min((data.jumlah / data.goal) * 100, 100) : 0;
-      const fill = document.getElementById("progress-fill");
-      fill.style.width = persen + "%";
-      fill.textContent = Math.floor(persen) + "%";
+        const persen = data.goal ? Math.min((data.jumlah / data.goal) * 100, 100) : 0;
+        const fill = document.getElementById("progress-fill");
+        fill.style.width = persen + "%";
+        fill.textContent = Math.floor(persen) + "%";
+      } catch (error) {
+        console.error("Error loading tabungan details:", error);
+        alert("Gagal memuat detail tabungan.");
+      }
     }
 
     async function tambahSaldo() {
@@ -116,52 +377,86 @@
     }
 
     async function simpanTransaksi(tipe) {
-      const jumlah = parseInt(document.getElementById("jumlah").value);
-      const keterangan = document.getElementById("keterangan").value;
+      const jumlahInput = document.getElementById("jumlah");
+      const keteranganInput = document.getElementById("keterangan");
+      const jumlah = parseInt(jumlahInput.value);
+      const keterangan = keteranganInput.value.trim();
 
-      if (isNaN(jumlah) || jumlah <= 0) return alert("Masukkan jumlah yang valid!");
-      if (!keterangan) return alert("Keterangan wajib diisi!");
+      if (isNaN(jumlah) || jumlah <= 0) {
+        alert("Masukkan jumlah yang valid (angka positif)!");
+        return;
+      }
+      if (!keterangan) {
+        alert("Keterangan transaksi wajib diisi!");
+        return;
+      }
 
-      const tab = await tabunganRef.get();
-      let saldo = tab.data().jumlah || 0;
-      saldo = tipe === "tambah" ? saldo + jumlah : saldo - jumlah;
-      if (saldo < 0) saldo = 0;
+      try {
+        const tab = await tabunganRef.get();
+        let saldo = tab.data().jumlah || 0;
+        
+        let newSaldo;
+        if (tipe === "tambah") {
+          newSaldo = saldo + jumlah;
+        } else { // tipe === "kurang"
+          newSaldo = saldo - jumlah;
+          if (newSaldo < 0) {
+            if (!confirm("Saldo akan menjadi negatif atau nol. Lanjutkan?")) {
+              return; // Stop if user cancels
+            }
+            newSaldo = 0; // Optionally cap at 0
+          }
+        }
 
-      await tabunganRef.update({ jumlah: saldo });
-      await tabunganRef.collection("transaksi").add({
-        jumlah: jumlah,
-        tipe: tipe,
-        keterangan: keterangan,
-        waktu: firebase.firestore.FieldValue.serverTimestamp()
-      });
+        await tabunganRef.update({ jumlah: newSaldo });
+        await tabunganRef.collection("transaksi").add({
+          jumlah: jumlah,
+          tipe: tipe,
+          keterangan: keterangan,
+          waktu: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-      document.getElementById("jumlah").value = "";
-      document.getElementById("keterangan").value = "";
-      loadTabungan();
-      loadRiwayat();
+        jumlahInput.value = "";
+        keteranganInput.value = "";
+        loadTabungan();
+        loadRiwayat();
+      } catch (error) {
+        alert("Gagal menyimpan transaksi: " + error.message);
+      }
     }
 
     async function loadRiwayat() {
-      const snapshot = await tabunganRef.collection("transaksi").orderBy("waktu", "desc").get();
       const list = document.getElementById("riwayat-list");
-      list.innerHTML = "";
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const el = document.createElement("div");
-        el.className = "riwayat-item";
-        el.innerHTML = `
-          <span class="${d.tipe === 'tambah' ? 'positif' : 'negatif'}">
-            ${d.tipe === 'tambah' ? '+' : '-'} ${formatRupiah(d.jumlah)}
-          </span>
-          <span>${d.keterangan}</span>
-          <small>${d.waktu?.toDate().toLocaleString('id-ID') || ''}</small>
-        `;
-        list.appendChild(el);
-      });
+      list.innerHTML = ""; // Clear existing history
+
+      try {
+        const snapshot = await tabunganRef.collection("transaksi").orderBy("waktu", "desc").get();
+        if (snapshot.empty) {
+          list.innerHTML = "<p style='text-align:center; color:#777;'>Belum ada riwayat transaksi.</p>";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          const el = document.createElement("div");
+          el.className = "riwayat-item";
+          el.innerHTML = `
+            <span class="${d.tipe === 'tambah' ? 'positif' : 'negatif'}">
+              ${d.tipe === 'tambah' ? '<i class="fas fa-plus-circle"></i>' : '<i class="fas fa-minus-circle"></i>'} ${formatRupiah(d.jumlah)}
+            </span>
+            <span>${d.keterangan}</span>
+            <small>${d.waktu?.toDate().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) || ''}</small>
+          `;
+          list.appendChild(el);
+        });
+      } catch (error) {
+        console.error("Error loading transaction history:", error);
+        list.innerHTML = "<p style='text-align:center; color:var(--danger-color);'>Gagal memuat riwayat transaksi.</p>";
+      }
     }
 
     function formatRupiah(angka) {
-      return "Rp " + angka.toLocaleString("id-ID");
+      return "Rp " + angka.toLocaleString("id-ID", { minimumFractionDigits: 0 });
     }
   </script>
 </body>
