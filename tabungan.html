@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detail Tabungan</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; }
+    .progress-container { margin: 20px 0; }
+    .progress-bar { height: 25px; background: #e0e0e0; border-radius: 12px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #27ae60; width: 0%; color: white; text-align: center; line-height: 25px; transition: width 0.5s; }
+    .form-group { margin: 15px 0; }
+    input, textarea, button { width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #2980b9; color: white; border: none; }
+    button:hover { background: #1c6ea4; }
+    .saldo-section { display: flex; gap: 10px; margin-top: 10px; }
+    .riwayat { margin-top: 30px; }
+    .riwayat-item { padding: 10px; border-bottom: 1px solid #ddd; }
+    .riwayat-item span { display: block; }
+    .positif { color: #27ae60; }
+    .negatif { color: #c0392b; }
+    a { color: #2980b9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="judul">Detail Tabungan</h2>
+    <p><strong>Link:</strong> <a id="link" href="#" target="_blank"></a></p>
+    <p><strong>Catatan:</strong> <span id="catatan"></span></p>
+
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill">0%</div>
+      </div>
+      <p><strong>Saldo:</strong> <span id="saldo"></span> / <span id="goal"></span></p>
+    </div>
+
+    <div class="saldo-section">
+      <div class="form-group">
+        <input type="number" id="jumlah" placeholder="Jumlah (Rp)">
+        <textarea id="keterangan" placeholder="Keterangan"></textarea>
+        <button onclick="tambahSaldo()">➕ Tambah Saldo</button>
+        <button onclick="kurangiSaldo()">➖ Kurangi Saldo</button>
+      </div>
+    </div>
+
+    <div class="riwayat">
+      <h3>Riwayat Transaksi</h3>
+      <div id="riwayat-list"></div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-8b8RmeR6VLQEOQrOfgL4xCPBmhItrSQ",
+      authDomain: "aplikasi-menabung-3ff2f.firebaseapp.com",
+      projectId: "aplikasi-menabung-3ff2f",
+      storageBucket: "aplikasi-menabung-3ff2f.firebasestorage.app",
+      messagingSenderId: "385953111428",
+      appId: "1:385953111428:web:2aaa2e8798441ad4fa91d1",
+      measurementId: "G-B4NMV4L71L"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let userId, tabunganId, tabunganRef;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      auth.onAuthStateChanged(async user => {
+        if (!user) return alert("Harus login dulu!");
+        userId = user.uid;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        tabunganId = urlParams.get("id");
+        if (!tabunganId) return alert("ID tabungan tidak ditemukan!");
+
+        tabunganRef = db.collection("users").doc(userId).collection("tabungan").doc(tabunganId);
+        loadTabungan();
+        loadRiwayat();
+      });
+    });
+
+    async function loadTabungan() {
+      const doc = await tabunganRef.get();
+      if (!doc.exists) return alert("Tabungan tidak ditemukan.");
+
+      const data = doc.data();
+      document.getElementById("judul").textContent = data.nama;
+      document.getElementById("saldo").textContent = formatRupiah(data.jumlah || 0);
+      document.getElementById("goal").textContent = formatRupiah(data.goal || 0);
+      document.getElementById("link").textContent = data.link || "-";
+      document.getElementById("link").href = data.link || "#";
+      document.getElementById("catatan").textContent = data.catatan || "-";
+
+      const persen = data.goal ? Math.min((data.jumlah / data.goal) * 100, 100) : 0;
+      const fill = document.getElementById("progress-fill");
+      fill.style.width = persen + "%";
+      fill.textContent = Math.floor(persen) + "%";
+    }
+
+    async function tambahSaldo() {
+      await simpanTransaksi("tambah");
+    }
+
+    async function kurangiSaldo() {
+      await simpanTransaksi("kurang");
+    }
+
+    async function simpanTransaksi(tipe) {
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const keterangan = document.getElementById("keterangan").value;
+
+      if (isNaN(jumlah) || jumlah <= 0) return alert("Masukkan jumlah yang valid!");
+      if (!keterangan) return alert("Keterangan wajib diisi!");
+
+      const tab = await tabunganRef.get();
+      let saldo = tab.data().jumlah || 0;
+      saldo = tipe === "tambah" ? saldo + jumlah : saldo - jumlah;
+      if (saldo < 0) saldo = 0;
+
+      await tabunganRef.update({ jumlah: saldo });
+      await tabunganRef.collection("transaksi").add({
+        jumlah: jumlah,
+        tipe: tipe,
+        keterangan: keterangan,
+        waktu: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      document.getElementById("jumlah").value = "";
+      document.getElementById("keterangan").value = "";
+      loadTabungan();
+      loadRiwayat();
+    }
+
+    async function loadRiwayat() {
+      const snapshot = await tabunganRef.collection("transaksi").orderBy("waktu", "desc").get();
+      const list = document.getElementById("riwayat-list");
+      list.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const el = document.createElement("div");
+        el.className = "riwayat-item";
+        el.innerHTML = `
+          <span class="${d.tipe === 'tambah' ? 'positif' : 'negatif'}">
+            ${d.tipe === 'tambah' ? '+' : '-'} ${formatRupiah(d.jumlah)}
+          </span>
+          <span>${d.keterangan}</span>
+          <small>${d.waktu?.toDate().toLocaleString('id-ID') || ''}</small>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    function formatRupiah(angka) {
+      return "Rp " + angka.toLocaleString("id-ID");
+    }
+  </script>
+</body>
+</html>
