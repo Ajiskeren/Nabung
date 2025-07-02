@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aplikasi Menabung</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    h1, h2 { text-align: center; }
+    input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #2ecc71; color: white; border: none; cursor: pointer; }
+    button:hover { background: #27ae60; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    .hapus-btn { background: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 5px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Aplikasi Menabung</h1>
+
+  <div id="auth">
+    <h2>Login / Register</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+    <p id="auth-msg"></p>
+  </div>
+
+  <div id="user-area" style="display:none;">
+    <p>Login sebagai: <span id="userEmail"></span> <button onclick="logout()">Logout</button></p>
+    
+    <h2>Tambah Tabungan</h2>
+    <input type="text" id="nama" placeholder="Nama Tabungan">
+    <input type="number" id="jumlah" placeholder="Jumlah (Rp)">
+    <input type="number" id="goal" placeholder="Target Tabungan (Rp)">
+    <input type="url" id="link" placeholder="Link Barang (opsional)">
+    <textarea id="catatan" placeholder="Catatan (opsional)"></textarea>
+    <button onclick="tambahTabungan()">Tambah</button>
+
+    <h2>Data Tabungan</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Jumlah</th>
+          <th>Goal</th>
+          <th>Link</th>
+          <th>Catatan</th>
+          <th>Hapus</th>
+        </tr>
+      </thead>
+      <tbody id="tabel-tabungan"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Konfigurasi Firebase kamu
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-8b8RmeR6VLQEOQrOfgL4xCPBmhItrSQ",
+    authDomain: "aplikasi-menabung-3ff2f.firebaseapp.com",
+    projectId: "aplikasi-menabung-3ff2f",
+    storageBucket: "aplikasi-menabung-3ff2f.firebasestorage.app",
+    messagingSenderId: "385953111428",
+    appId: "1:385953111428:web:2aaa2e8798441ad4fa91d1",
+    measurementId: "G-B4NMV4L71L"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+
+  function formatRupiah(angka) {
+    return "Rp " + angka.toLocaleString("id-ID", { minimumFractionDigits: 0 });
+  }
+
+  async function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    try {
+      const result = await auth.signInWithEmailAndPassword(email, password);
+      currentUser = result.user;
+      afterLogin();
+    } catch (err) {
+      document.getElementById("auth-msg").textContent = "Login gagal: " + err.message;
+    }
+  }
+
+  async function register() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    try {
+      const result = await auth.createUserWithEmailAndPassword(email, password);
+      currentUser = result.user;
+      afterLogin();
+    } catch (err) {
+      document.getElementById("auth-msg").textContent = "Registrasi gagal: " + err.message;
+    }
+  }
+
+  async function logout() {
+    await auth.signOut();
+    location.reload();
+  }
+
+  async function afterLogin() {
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("user-area").style.display = "block";
+    document.getElementById("userEmail").textContent = currentUser.email;
+    loadTabungan();
+  }
+
+  async function tambahTabungan() {
+    const nama = document.getElementById("nama").value;
+    const jumlah = parseInt(document.getElementById("jumlah").value);
+    const goal = parseInt(document.getElementById("goal").value);
+    const link = document.getElementById("link").value;
+    const catatan = document.getElementById("catatan").value;
+
+    if (!nama || isNaN(jumlah)) {
+      alert("Nama dan jumlah wajib diisi!");
+      return;
+    }
+
+    await db.collection("users").doc(currentUser.uid).collection("tabungan").add({
+      nama, jumlah, goal, link, catatan,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    loadTabungan();
+    document.getElementById("nama").value = "";
+    document.getElementById("jumlah").value = "";
+    document.getElementById("goal").value = "";
+    document.getElementById("link").value = "";
+    document.getElementById("catatan").value = "";
+  }
+
+  async function loadTabungan() {
+    const snapshot = await db.collection("users").doc(currentUser.uid).collection("tabungan").orderBy("createdAt", "desc").get();
+    const tbody = document.getElementById("tabel-tabungan");
+    tbody.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${data.nama}</td>
+        <td>${formatRupiah(data.jumlah)}</td>
+        <td>${formatRupiah(data.goal || 0)}</td>
+        <td>${data.link ? `<a href="${data.link}" target="_blank">Lihat</a>` : "-"}</td>
+        <td>${data.catatan || "-"}</td>
+        <td><button class="hapus-btn" onclick="hapusTabungan('${doc.id}')">Hapus</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  async function hapusTabungan(id) {
+    if (confirm("Yakin hapus tabungan ini?")) {
+      await db.collection("users").doc(currentUser.uid).collection("tabungan").doc(id).delete();
+      loadTabungan();
+    }
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      afterLogin();
+    }
+  });
+</script>
+</body>
+</html>
