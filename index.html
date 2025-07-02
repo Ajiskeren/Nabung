@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Aplikasi Menabung</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
     .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
@@ -60,8 +57,14 @@
   </div>
 </div>
 
+<!-- 🔥 Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<!-- ✅ Aplikasi -->
 <script>
-  // Konfigurasi Firebase kamu
+  // ✅ Konfigurasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyD-8b8RmeR6VLQEOQrOfgL4xCPBmhItrSQ",
     authDomain: "aplikasi-menabung-3ff2f.firebaseapp.com",
@@ -72,16 +75,18 @@
     measurementId: "G-B4NMV4L71L"
   };
 
+  // ✅ Inisialisasi Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-
   let currentUser = null;
 
+  // Format uang Indonesia
   function formatRupiah(angka) {
     return "Rp " + angka.toLocaleString("id-ID", { minimumFractionDigits: 0 });
   }
 
+  // Login
   async function login() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -94,6 +99,7 @@
     }
   }
 
+  // Register
   async function register() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -106,11 +112,13 @@
     }
   }
 
+  // Logout
   async function logout() {
     await auth.signOut();
     location.reload();
   }
 
+  // Setelah login berhasil
   async function afterLogin() {
     document.getElementById("auth").style.display = "none";
     document.getElementById("user-area").style.display = "block";
@@ -118,6 +126,7 @@
     loadTabungan();
   }
 
+  // Tambah tabungan
   async function tambahTabungan() {
     const nama = document.getElementById("nama").value;
     const jumlah = parseInt(document.getElementById("jumlah").value);
@@ -143,6 +152,7 @@
     document.getElementById("catatan").value = "";
   }
 
+  // Tampilkan tabungan
   async function loadTabungan() {
     const snapshot = await db.collection("users").doc(currentUser.uid).collection("tabungan").orderBy("createdAt", "desc").get();
     const tbody = document.getElementById("tabel-tabungan");
@@ -162,6 +172,7 @@
     });
   }
 
+  // Hapus tabungan
   async function hapusTabungan(id) {
     if (confirm("Yakin hapus tabungan ini?")) {
       await db.collection("users").doc(currentUser.uid).collection("tabungan").doc(id).delete();
@@ -169,6 +180,7 @@
     }
   }
 
+  // Otomatis login jika sudah login sebelumnya
   auth.onAuthStateChanged(user => {
     if (user) {
       currentUser = user;
